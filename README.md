@@ -8,6 +8,7 @@
 - 일정 : 2023.12.29 ~ ing
 
 - 매주 금요일 7시 30분에 구글 미트에서 진행합니다.
+- https://meet.google.com/vvh-kwzk-dkf
 
 <br/>
 
