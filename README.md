@@ -8,15 +8,17 @@
 - 일정 : 2023.12.29 ~ ing
 
 - 매주 금요일 7시 30분에 구글 미트에서 진행합니다.
+- https://meet.google.com/vvh-kwzk-dkf
 
 <br/>
 
 ## ✏️참가 인원
 
 
-| 이다원 | 최영은 | 안수지 | 장철희 | 진우람| 
-| --- | --- | --- | --- | --- | 
-| [깃허브](https://github.com/dawonss) | [깃허브](https://github.com/Choi-Young-Eun) | [깃허브](https://github.com/deltawing71911) |  [깃허브](https://github.com/Jang-namu) | [깃허브](https://github.com/uramjin) | 
+| 이다원 | 최영은 | 안수지 | 장철희 | 진우람| 문병민|
+| --- | --- | --- | --- | --- | --- |
+| [깃허브](https://github.com/dawonss) | [깃허브](https://github.com/Choi-Young-Eun) | [깃허브](https://github.com/deltawing71911) |  [깃허브](https://github.com/Jang-namu) | [깃허브](https://github.com/uramjin) | [깃허브](https://github.com/qudalsrnt3x) | 
+
 
 
 
@@ -26,7 +28,7 @@
 
 ### 🎯Rule
 
-- 분량은 주당 item5개씩 정리한다 
+- 분량은 주당 item5 정리한다 
 
 - 각자 공부한 것을 스터디 시간 전까지 마크 다운으로 정리하여 깃허브에 업로드
 
