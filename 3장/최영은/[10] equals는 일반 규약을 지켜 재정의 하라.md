@@ -75,6 +75,108 @@ public class Main{
 > 4. 해결 : 따라서 CIS와 String을 연동하려 하지말고 CIS인지만 확인하도록 하라!
 ### 6️⃣ 추이성 
 * **첫번째와 두번째** 객체가 같고 **두번째와 세번째 객체가 같다면**, **첫번째와 세번째 객체도 같아야** 한다
+```java
+//1. 상위 클래스 Point
+public class Point{
+   private final int x;
+   private final int y;
+
+   public Point(int x, int y) {
+      this.x = x;
+      this.y = y;
+   }
+
+   @Override public boolean equals(Object o) {
+      if (!(o instanceof Point))   return false;
+      Point p = (Point) o;
+      return p.x == x && p.y == y;
+   }
+   ...
+}
+//2. 확장한 하위 클래스 ColorPoint : 새로운 필드인 color 추가
+public class ColorPoint extends Point {
+   private final Color color;
+   public ColorPoint(int x, int y, Color color) {
+      super(x, y);
+      this.color = color;
+   }
+   ...
+}
+```
+> 이 경우 Point.equals() 메서드에서는 ColorPoint의 주요 정보인 color를 비교할 수 없이 무시되기 때문에 만족할 수 없다
+```java
+//잘못된 코드1 - 대칭성 위배 : ColorPoint.equals()에서 ColorPoint 클래스 타입만 확인
+public class ColorPoint {
+   ...
+   @Override public boolean equals(Object o) {
+      if (!(o instanceof ColorPoint))   return false;
+      return super.equals(o) && ((ColorPoint) o).color == color;
+   }
+}
+//사용 예제
+public class Main {
+   public static void main(String[] args){
+      Point p = new Point(3,4);
+      ColorPoint cp = new ColorPoint(3,4,Color.BLUE);
+      p.equals(cp);   //1. 반환 : true
+      cp.equals(p);   //2. 반환 : false
+   }
+}
+```
+> 1. Point.equals()에서는 Point의 하위 클래스인 ColorPoint를 비교하여 true가 반환되지만 color 정보를 비교하지 않고 있음
+> 2. ColorPoint가 아닌 Point 클래스를 매개변수로 받았기 때문에 false 반환
+```java
+//잘못된 코드2 - 대칭성은 맞지만, 추이성 위배
+public class ColorPoint {
+   ...
+   @Override public boolean equals(Object o) {
+      if (!(o instanceof Point))   return false;
+      if (!(o instanceof ColorPoint))   return o.equals(this);
+      return super.equals(o) && ((ColorPoint) o).color == color;
+   }
+}
+//사용 예제
+public class Main {
+   public static void main(String[] args){
+      Point p = new Point(3,4);
+      ColorPoint cp1 = new ColorPoint(3,4,Color.BLUE);
+      ColorPoint cp2 = new ColorPoint(3,4,Color.WHITE);
+      cp1.equals(p);   //1. 반환 : true
+      p.equals(cp2);   //2. 반환 : true
+      cp1.equals(cp2);   //3. 반환 : false
+   }
+}
+```
+> 1. ColorPoint.equals() 내에 Point 클래스도 추가되어 true 반환
+> 3. color 값이 다르기 때문에 false 반환 <br>
+> * 또한 이 방식은 무한 재귀를 일으킬 가능성도 존재함
+> * 사실상 **구체 클래스를 확장하여 새로운 값을 추가하면서 equals 일반 규약을 만족할 수는 없음**!
+```java
+//우회 방법 : equals 일반 규약 지키면서 값 추가 성공
+public class ColorPoint {
+   private final Point point;   //1. Point 클래스 타입의 필드 추가
+   private final Color color;
+
+   public ColorPoint(int x, int y, Color color) {
+      point = new Point(x, y);
+      this.color = Objects.requireNonNull(color);
+   }
+
+   public Point asPoint() {   //2. point 조회 시 이용할 메서드 추가
+      return point;
+   }
+
+   @Override public boolean equals(Object o) {   //3. point와 color 모두 비교 가능
+      if (!(o instanceof ColorPoint))   return false;
+      ColorPoint cp = (ColorPoint) o;
+      return cp.point.equals(point) && cp.color.equals(color);
+   }
+   ...
+}
+```
+> 1. 상속 대신 컴포지션을 사용하여 상위 클래스 타입의 필드를 private으로 둔다
+> 2. 상위 클래스 타입의 필드를 조회할 수 있는 public 메서드를 추가한다
+> 3. equals() 내에서 point와 color 필드를 각각 비교하도록 한다
 ### 7️⃣ 일관성
 * **두 객체가 같다면 수정되지 않는 한 영원히 같아야** 한다
     * 그러므로 equals의 판단에 신뢰할 수 없는 자원이 끼어들게 해서는 안된다
