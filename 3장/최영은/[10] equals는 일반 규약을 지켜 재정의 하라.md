@@ -1,6 +1,22 @@
 ## 10. equals는 일반 규약을 지켜 재정의 하라
 ### 1️⃣ equals를 재정의 하지 않을 상황
+1. 각 **인스턴스가 본질적으로 고유**한 경우
+    * 값 표현이 아닌 **동작하는 개체를 표현하는 클래스**
+    * Thread가 여기에 해당
+    * Object의 equals 메서드는 이러한 클래스에 딱 맞게 구현됨
+2. 인스턴스의 '논리적 동치성(logical equality)'을 검사할 일이 없는 경우
+    * 설계자나 클라이언트가 **논리적 동치성을 검사할 필요가 없다**고 생각하거나 **원하지 않는 경우** Object.equals()만으로도 해결됨
+3. 상위 클래스의 **재정의된 equals가 하위 클래스에도 딱** 들어 맞는 경우
+    * ex. AbstractSet-Set, AbstractList-List, AbstractMap-Map
+    * 상위 클래스인 AbstractOOO가 구현한 equals를 각 구현체들은 상속받아 그대로 사용
+4. 클래스가 private 혹은 package-private이고 .equals()를 호출할 일이 없는 경우
 ### 2️⃣ equals를 재정의 해야하는 상황
+1. 객체 식별성이 아닌 **논리적 동치성을 확인**해야하는데
+2. **상위 클래스**의 equals가 **논리적 동치성을 비교하도록 재정의 되지 않은** 경우
+    * ex. **값 클래스** : Integer, String과 같은 **값을 표현하는 클래스**들이 해당
+    * 이 경우에 만일 재정의 해둔다면 **해당 인스턴스의 값을 비교할 수 있**는 것을 기본이고, **Map과 Set의 원소로도 사용할 수 있**게 된다.
+* 단, 값 클래스 중 같은 인스턴스가 둘 이상 만들어지지 않음을 보장하는 **인스턴스 통제 클래스**의 경우에는 **재정의 하지 않아도 된다. (Enum도 해당)**
+* 이 경우, **논리적으로 같은 인스턴스가 2개 이상 만들어 질 수 없기 때문**에 **논리적 동치성과 객체 식별성이 동일한 의미**를 나타내게 된다. Object.equals() 만으로 논리적 동치성까지 확인이 가능
 ### 3️⃣ equals 재정의 시 따라야하는 일반 규약
 1. **반사성**
      * null이 아닌 모든 참조값 x에 대해, **x.equals(x) ➡️ true**
@@ -16,9 +32,47 @@ y.equlas(z) == true ➡️ x.equlas(z) == true**
 ### 4️⃣ 반사성
 * 객체는 **자기 자신과 같아야 한다**
 ### 5️⃣ 대칭성
-* 두 객체는 **서로에 대한 동치 여부를 똑같이 답**해야 한다
--> 어기는 예) 
-    * 해결 :  CIS와 String을 연동하겠다는 생각 자체를 버리고 CIS인지만 확인하도록 하라!
+* 두 객체는 **서로에 대한 동치 여부를 똑같이** 답해야 한다
+```java
+//잘못된 코드 : 대칭성 위배
+public final class CaseInsensitiveString {
+    private final String s;
+
+    public CaseInsensitiveString(String s){
+        this.s = Objects.requireNonNull(s);
+    }
+    //대칭성 위배 : String도 포함
+    @Override public boolean equals(Object o) {
+        if (o instanceof CaseInsensitiveString)
+            return s.equalsIgnoreCase(((CaseInsensitiveString) o).s);
+        if (o instanceof String)
+            return s.equalsIgnoreCase((String) o);
+    }
+    //변경된 메서드 : 오직 CaseInsensitiveString인지만 확인
+    @Override public boolean equals(Object o) {
+        return o instanceof CaseInsensitiveString && ((CaseInsensitiveString) o).s.equalsIgnoreCase(s); 
+    }
+    ...
+}
+
+//테스트
+public class Main{
+    public static void main(String[] args) {
+        CaseInsensitiveString cis = new CaseInsensitiveString("Polish");
+        String s = "polish";
+        cis.equals(s); //1. 반환 : true
+        s.equals(cis); //2. 반환 : false
+
+        List<CaseInsensitiveString> list = new ArrayList<>();
+        list.add(cis); //3. 컬렉션에 넣는 경우
+        list.contains(s);
+    }
+}
+```
+> 1. CaseInsensitiveString.equals()는 String을 알고있어 true로 반환
+> 2. String.equals()는 CaseInsensitiveString을 알지못해 false로 반환
+> 3. 구현하기 나름이라 equals 규약을 어긴객체를 사용하는 다른 객체들이 어떤 반응을 보일지 알 수 없다
+> 4. 해결 : 따라서 CIS와 String을 연동하려 하지말고 CIS인지만 확인하도록 하라!
 ### 6️⃣ 추이성 
 * **첫번째와 두번째** 객체가 같고 **두번째와 세번째 객체가 같다면**, **첫번째와 세번째 객체도 같아야** 한다
 ### 7️⃣ 일관성
