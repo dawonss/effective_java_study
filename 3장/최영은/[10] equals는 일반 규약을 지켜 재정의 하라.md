@@ -55,7 +55,7 @@ public final class CaseInsensitiveString {
     ...
 }
 
-//테스트
+//사용 예제
 public class Main{
     public static void main(String[] args) {
         CaseInsensitiveString cis = new CaseInsensitiveString("Polish");
@@ -113,6 +113,7 @@ public class ColorPoint {
       return super.equals(o) && ((ColorPoint) o).color == color;
    }
 }
+
 //사용 예제
 public class Main {
    public static void main(String[] args){
@@ -135,6 +136,7 @@ public class ColorPoint {
       return super.equals(o) && ((ColorPoint) o).color == color;
    }
 }
+
 //사용 예제
 public class Main {
    public static void main(String[] args){
@@ -151,6 +153,7 @@ public class Main {
 > 3. color 값이 다르기 때문에 false 반환 <br>
 > * 또한 이 방식은 무한 재귀를 일으킬 가능성도 존재함
 > * 사실상 **구체 클래스를 확장하여 새로운 값을 추가하면서 equals 일반 규약을 만족할 수는 없음**!
+> * * 자바 라이브러리의 java.sql.Timestamp는 java.util.Date를 확장한 후 nanoseconds 필드를 추가하였고, 결과적으로 Timestamp.equals()의 대칭성 위반 문제로 Timestamp와 Date를 섞어서 사용하는 경우 문제가 될 수 있다고 함 주의!
 ```java
 //우회 방법 : equals 일반 규약 지키면서 값 추가 성공
 public class ColorPoint {
@@ -184,14 +187,44 @@ public class ColorPoint {
     * 예) java.net.URL의 equals
 ### 8️⃣ null-아님
 * **모든 객체가 null과 같지 않아야** 한다
-1. 명시적 null검사는 필요 없음 //코드 p61하단
-2. 묵시적 null 검사로 가능하다 //코드 p62 상단 - 이유도 함께
+* 값이 true를 반환하는 것이 아니더라도 NullPointerException을 던지는 것 조차 안된다
 * 간혹 **null 값도 정상값으로 취급하는 참조 타입 필드**도 있는데 이런 필드는 **Object.equals(Object, Object)로 비교**하여 NullPointException을 예방하도록 한다
+```java
+//1. 명시적 null 검사 : 입력이 null인지 확인. 이러한 검사는 필요 없음
+@Override public boolean equals(Object o) {
+   if (o == null)   return false;
+   ...
+}
+
+//2. 묵시적 null 검사 : 이경우가 조금 더 나음.
+@Override public boolean equals(Object o) {
+   if (!(o instanceof MyType))   return false;
+   MyType mt = (MyType) o;
+   ...
+}
+```
+> 동치성을 검사하기 위해서는 적절히 형변환하여 필수 필드 값을 비교해야하므로 instanceof를 이용하여 올바른 타입인지 확인 <br>
+> 만일 타입을 확인하지 않아 잘못된 타입이 인수로 주어진다면 ClassCastException을 던져 일반 규약을 위배하게 됨 <br>
+> instanceof는 비교 대상으로 null이 주어져도 false를 반환하기 때문에 명시적인 null 검사는 불필요 <br>
 ### 9️⃣ 양질의 equals 메서드 구현 방법
-1. **== 연산자를 사용**해 입력이 **자기 자신의 참조인지 확인**하여 자기 자신이라면 true 반환
+1. **== 연산자를 사용**해 입력이 **자기 자신의 참조인지 확인**하여 자기 자신이라면 **true 반환**
 2. **instanceOf 연산자로 입력이 올바른 타입인지 확인**하여 그렇지 않다면 false 반환
-    * 타입에 인터페이스가 올 수 도 있음 ////코드 추가하기 - p.62
+    * 보통 정의된 클래스가 올바른 타입
+    * 하지만 만일 인터페이스가 필요에 의해 자신을 구현한 서로 다른 클래스간의 비교를 원한다면, 이를 구현한 클래스들도 equals에서 인터페이스를 사용하여야 한다
+         * ex) Set, List, Map 등 컬렉션 인터페이스
 3. 입력을 올바른 타입으로 **형변환**
-    * 2번 덕분에 100% 성공
 4. 입력 객체와 자기 자신의 대응되는 **'핵심' 필드 들이 모두 일치하는지 하나씩 검사**
     * 하나라도 다르면 false, 모두 일치하면 true 반환
+    * 2단계에서 인터페이스를 사용한 경우 입력 객체의 필드 값을 가져오는 경우에도 해당 인터페이스의 메서드를 사용하여야 한다.
+### 0️⃣ 그 외 주의사항
+1. float와 double은 .compare(), 이를 제외한 기본 타입 필드는 ==, 참조 타입 필드는 각 equals()로 비교한다
+2. 배열 필드는 각 원소를 비교하고, 배열의 모든 원소가 핵심 필드인 경우 Arrays.equals() 중 하나를 사용한다
+3. 불변이며 비교가 복잡한 필드를 가진 클래스의 경우 필드의 표준형을 저장하여 표준형끼리 비교하도록 한다
+4. 필드는 다를 가능성이 더 크거나 비교하는 비용이 싼 필드를 먼저 비교하도록 한다
+5. **equals()를 재정의 할 땐 hashCode도 반드시 재정의 한다**
+6. equals()를 재정의 할 땐 너무 복잡하게 비교하기 보단 **필드들의 동치성만 검사한다고 생각하고 접근하자**
+7. Object.equals()를 재정의 하는 것으로 **equals()의 매개변수는 반드시 Object 타입**으로 받는다
+8. AutoValue를 이용하면 자동으로 테스트 할 수 있다
+### ❗ 핵심 요약
+1. **꼭 필요한 경우가 아니면 equals()를 재정의 하지 않는다**
+2. 재정의 하는 경우 클래스 내의 **모든 핵심 필드를 equals 일반 규약에 맞게 비교**하도록 한다
