@@ -7,18 +7,14 @@
 
 - 일정 : 2023.12.29 ~ ing
 
-- 매주 금요일 7시 30분에 구글 미트에서 진행합니다.
-- https://meet.google.com/vvh-kwzk-dkf
 
-<br/>
 
 ## ✏️참가 인원
 
 
-| 이다원 | 최영은 | 안수지 | 진우람| 
-| --- | --- | --- | --- | 
-| [깃허브](https://github.com/dawonss) | [깃허브](https://github.com/Choi-Young-Eun) | [깃허브](https://github.com/deltawing71911) |   [깃허브](https://github.com/uramjin) |
-
+| 이다원 | 최영은 | 
+| --- | --- | 
+| [깃허브](https://github.com/dawonss) | [깃허브](https://github.com/Choi-Young-Eun) | 
 
 
 
